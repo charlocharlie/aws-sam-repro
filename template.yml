@@ -1,0 +1,298 @@
+Resources:
+  TableCD117FA1:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      TableName: my-table-name
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Metadata:
+      aws:cdk:path: AwsSamReproStack/Table/Resource
+  HandlerServiceRoleFCDC14AE:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+        Version: "2012-10-17"
+      ManagedPolicyArns:
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+    Metadata:
+      aws:cdk:path: AwsSamReproStack/Handler/ServiceRole/Resource
+  Handler886CB40B:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket:
+          Ref: AssetParameters10f3cf1cdc0c03834e0b9b24d2bbc7656594831c44c3b8f1a21986a083b243b5S3BucketF9DD027B
+        S3Key:
+          Fn::Join:
+            - ""
+            - - Fn::Select:
+                  - 0
+                  - Fn::Split:
+                      - "||"
+                      - Ref: AssetParameters10f3cf1cdc0c03834e0b9b24d2bbc7656594831c44c3b8f1a21986a083b243b5S3VersionKey26CD531B
+              - Fn::Select:
+                  - 1
+                  - Fn::Split:
+                      - "||"
+                      - Ref: AssetParameters10f3cf1cdc0c03834e0b9b24d2bbc7656594831c44c3b8f1a21986a083b243b5S3VersionKey26CD531B
+      Handler: handler.handler
+      Role:
+        Fn::GetAtt:
+          - HandlerServiceRoleFCDC14AE
+          - Arn
+      Runtime: nodejs12.x
+      Environment:
+        Variables:
+          TABLE_NAME:
+            Ref: TableCD117FA1
+          TEST_VAR_TEMPLATE: TEST
+    DependsOn:
+      - HandlerServiceRoleFCDC14AE
+    Metadata:
+      aws:cdk:path: AwsSamReproStack/Handler/Resource
+      aws:asset:path: /Users/ccl014/projects/aws-sam-repro/lambda/dist
+      aws:asset:property: Code
+  APIGateway71B6BBE0:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: APIGateway
+    Metadata:
+      aws:cdk:path: AwsSamReproStack/APIGateway/Resource
+  APIGatewayDeploymentF0E5ED0A7a64761b5f01963b51129000b56fe1ce:
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      RestApiId:
+        Ref: APIGateway71B6BBE0
+      Description: Automatically created by the RestApi construct
+    DependsOn:
+      - APIGatewayGET822E979A
+    Metadata:
+      aws:cdk:path: AwsSamReproStack/APIGateway/Deployment/Resource
+  APIGatewayDeploymentStageprod9BCCD7C3:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      RestApiId:
+        Ref: APIGateway71B6BBE0
+      DeploymentId:
+        Ref: APIGatewayDeploymentF0E5ED0A7a64761b5f01963b51129000b56fe1ce
+      StageName: prod
+    Metadata:
+      aws:cdk:path: AwsSamReproStack/APIGateway/DeploymentStage.prod/Resource
+  APIGatewayCloudWatchRole4835D6D9:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: apigateway.amazonaws.com
+        Version: "2012-10-17"
+      ManagedPolicyArns:
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs
+    Metadata:
+      aws:cdk:path: AwsSamReproStack/APIGateway/CloudWatchRole/Resource
+  APIGatewayAccount871F0E99:
+    Type: AWS::ApiGateway::Account
+    Properties:
+      CloudWatchRoleArn:
+        Fn::GetAtt:
+          - APIGatewayCloudWatchRole4835D6D9
+          - Arn
+    DependsOn:
+      - APIGateway71B6BBE0
+    Metadata:
+      aws:cdk:path: AwsSamReproStack/APIGateway/Account
+  APIGatewayGETApiPermissionAwsSamReproStackAPIGateway0609FAA4GETF50755EA:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+          - Handler886CB40B
+          - Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        Fn::Join:
+          - ""
+          - - "arn:"
+            - Ref: AWS::Partition
+            - ":execute-api:"
+            - Ref: AWS::Region
+            - ":"
+            - Ref: AWS::AccountId
+            - ":"
+            - Ref: APIGateway71B6BBE0
+            - /
+            - Ref: APIGatewayDeploymentStageprod9BCCD7C3
+            - /GET/
+    Metadata:
+      aws:cdk:path: AwsSamReproStack/APIGateway/Default/GET/ApiPermission.AwsSamReproStackAPIGateway0609FAA4.GET..
+  APIGatewayGETApiPermissionTestAwsSamReproStackAPIGateway0609FAA4GETA4602F22:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+          - Handler886CB40B
+          - Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        Fn::Join:
+          - ""
+          - - "arn:"
+            - Ref: AWS::Partition
+            - ":execute-api:"
+            - Ref: AWS::Region
+            - ":"
+            - Ref: AWS::AccountId
+            - ":"
+            - Ref: APIGateway71B6BBE0
+            - /test-invoke-stage/GET/
+    Metadata:
+      aws:cdk:path: AwsSamReproStack/APIGateway/Default/GET/ApiPermission.Test.AwsSamReproStackAPIGateway0609FAA4.GET..
+  APIGatewayGET822E979A:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      HttpMethod: GET
+      ResourceId:
+        Fn::GetAtt:
+          - APIGateway71B6BBE0
+          - RootResourceId
+      RestApiId:
+        Ref: APIGateway71B6BBE0
+      AuthorizationType: NONE
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri:
+          Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - ":apigateway:"
+              - Ref: AWS::Region
+              - :lambda:path/2015-03-31/functions/
+              - Fn::GetAtt:
+                  - Handler886CB40B
+                  - Arn
+              - /invocations
+    Metadata:
+      aws:cdk:path: AwsSamReproStack/APIGateway/Default/GET/Resource
+  CDKMetadata:
+    Type: AWS::CDK::Metadata
+    Properties:
+      Modules: aws-cdk=1.17.1,@aws-cdk/assets=1.18.0,@aws-cdk/aws-apigateway=1.18.0,@aws-cdk/aws-applicationautoscaling=1.18.0,@aws-cdk/aws-autoscaling-common=1.18.0,@aws-cdk/aws-cloudwatch=1.18.0,@aws-cdk/aws-dynamodb=1.18.0,@aws-cdk/aws-ec2=1.18.0,@aws-cdk/aws-events=1.18.0,@aws-cdk/aws-iam=1.18.0,@aws-cdk/aws-kms=1.18.0,@aws-cdk/aws-lambda=1.18.0,@aws-cdk/aws-s3=1.18.0,@aws-cdk/aws-s3-assets=1.18.0,@aws-cdk/aws-sqs=1.18.0,@aws-cdk/aws-ssm=1.18.0,@aws-cdk/core=1.18.0,@aws-cdk/cx-api=1.18.0,@aws-cdk/region-info=1.18.0,jsii-runtime=node.js/v8.12.0
+    Condition: CDKMetadataAvailable
+Parameters:
+  AssetParameters10f3cf1cdc0c03834e0b9b24d2bbc7656594831c44c3b8f1a21986a083b243b5S3BucketF9DD027B:
+    Type: String
+    Description: S3 bucket for asset "10f3cf1cdc0c03834e0b9b24d2bbc7656594831c44c3b8f1a21986a083b243b5"
+  AssetParameters10f3cf1cdc0c03834e0b9b24d2bbc7656594831c44c3b8f1a21986a083b243b5S3VersionKey26CD531B:
+    Type: String
+    Description: S3 key for asset version "10f3cf1cdc0c03834e0b9b24d2bbc7656594831c44c3b8f1a21986a083b243b5"
+  AssetParameters10f3cf1cdc0c03834e0b9b24d2bbc7656594831c44c3b8f1a21986a083b243b5ArtifactHash6ECE9419:
+    Type: String
+    Description: Artifact hash for asset "10f3cf1cdc0c03834e0b9b24d2bbc7656594831c44c3b8f1a21986a083b243b5"
+Outputs:
+  APIGatewayEndpoint038C57B1:
+    Value:
+      Fn::Join:
+        - ""
+        - - https://
+          - Ref: APIGateway71B6BBE0
+          - .execute-api.
+          - Ref: AWS::Region
+          - "."
+          - Ref: AWS::URLSuffix
+          - /
+          - Ref: APIGatewayDeploymentStageprod9BCCD7C3
+          - /
+Conditions:
+  CDKMetadataAvailable:
+    Fn::Or:
+      - Fn::Or:
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-east-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-northeast-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-northeast-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-southeast-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-southeast-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ca-central-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - cn-north-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - cn-northwest-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-central-1
+      - Fn::Or:
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-north-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-west-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-west-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-west-3
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - me-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - sa-east-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - us-east-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - us-east-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - us-west-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - us-west-2
+

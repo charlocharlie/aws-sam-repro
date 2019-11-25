@@ -1,8 +1,18 @@
-# Useful commands
+# Issue Repro for serverless-application-model
 
- * `npm run build`   compile typescript to js
- * `npm run watch`   watch for changes and compile
- * `npm run test`    perform the jest unit tests
- * `cdk deploy`      deploy this stack to your default AWS account/region
- * `cdk diff`        compare deployed stack with current state
- * `cdk synth`       emits the synthesized CloudFormation template
+Two issues are demonstrated in this reproduction:
+
+1. Lambda environment variable `Ref:`s are not resolved to resource names
+2. `--env-vars` does not work for `sam local start-api`
+
+## Setup
+
+1. Clone this repository
+1. `npm i`
+1. Run `./sam.sh`
+1. Open http://localhost:3000/ in your browser
+
+### Observe the environment variables in the console
+
+* TABLE_NAME is the template resource name rather than "my-table-name"
+* TEST_VAR_JSON is not in the environment variables

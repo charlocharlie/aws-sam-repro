@@ -1,0 +1,16 @@
+{
+  "name": "lambda",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "rm -rf dist && tsc && cp package*.json dist && cd dist && npm ci --only=production"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/aws-lambda": "8.10.36",
+    "@types/node": "12.12.12",
+    "typescript": "3.7.2"
+  }
+}
